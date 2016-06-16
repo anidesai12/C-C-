@@ -1,0 +1,867 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+#include <Windows.h>
+
+
+CONSOLE_SCREEN_BUFFER_INFO csbiInfo; 
+WORD wOldColorAttrs; 
+
+
+/*  Final project for Joshua Wilson and Ani Desai
+	FEB 16, 2016
+	Users are able to load the current state of the the seating chart upon initialization, after that they enter a number of tickets they wish to purchase. 
+	Users select a seating section, seat number, destination, and enter their name. tickets are displayed on the screen and written to a text file. Users may
+	enter numbers or letters at any point without crashing the program. for best results maximize the screen. 
+*/   
+
+
+
+
+
+
+
+int validateInput(unsigned char *userInput);										//ensures user input is appropriate for the given menu type (ie filters out numbers that are out of range and letters that mean nothing)
+int yesOrNo();																		//prompts for a yes or no and evaluates the response
+int invalidSelection();																//function notifies the user that the last selection was unsuccessful
+int selectSeat(int *arrayPtr, int custTier);										//function allows the user to pick a seat
+int selectTier(int *tierPtr);														//function to determine the desired seating section
+int printSeatDiagram(int *array);													//function to draw an airplane and print a seating chart
+int getName(char *usrName);															//function to retrieve the passangers name
+int printTicket (char *cName, int cDest, int cSeat, int cTier);						//function that prints the boarding pass and creates a textfile containing the boarding passes for the CURRENT session
+int updateSeatingSaved(int * lastSessionSeats);										//added feature to create a saved condition of the seating chart for future sessions
+int retrieveSeatingSaved(int *lastSessionSeats);									//added feature to read the saved condition of the seating chart from previous sessions
+
+
+
+
+
+
+
+int main ()
+
+{
+	int fcFull = 0;
+	int pfFull = 0;
+	int ecFull = 0;
+	int numTickets = 0;																//number of tickets for this iteration, used as sentinel for the loop.	
+	int custTier = 0;																//numeric representation of the chosen seating section.
+	int curDest = 0;																//numeric representation of the chosen destination.
+	int curSeat = 0;																//number of the current seat.
+	int arraySeats[17]={0};															//current status of the seating chart, can be erased with a 'R' reset.
+	int savedSeats[17]={0};															//saved state of seating chart prior to starting this reservation, used to restore array in event of a 'R' reset.
+	int resetYes = 0;																//sentinel value to track when the customer requests a reset.
+	char curName[25];																//character array for storing the customer name for this ticket.
+	int gotName=0;																	//numeric value representing a successful capture of passenger name (no numbers, two words with a space between them)
+	int i = 0;																		//counter for "for" loops
+	int loadYes = 0;																
+	int customerChoice = 0;
+	
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE),&csbiInfo);
+	wOldColorAttrs = csbiInfo.wAttributes;
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN );
+	
+		 printf("           _____________________________________________________ \n");
+         printf("          |                                                     |\n");
+         printf("          |                                                     |\n");
+         printf("          |          Welcome to Code Flight Airlines            |\n");
+         printf("          |             Reservation System                      |\n");
+         printf("          |                                                     |\n");
+         printf("          |_____________________________________________________|\n");
+        
+        printf("\n\n");
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), csbiInfo.wAttributes);
+		printf("            Upon initial startup this program can check for seating \n");		//Warning and information
+		printf("                 information saved from previous sessions.\n\n");
+		printf("            Would you like to load the saved seating chart? Enter Y or N\n\n");				//prompt to load saved data
+		loadYes = yesOrNo();														//determine user choice	
+		if (loadYes == 1)																
+			{
+				retrieveSeatingSaved(arraySeats);									//retrieve the state of the seating array from the last successful ticket reservation.
+			}
+				
+		numTickets=printIntro();													//priming read ensures at least one ticket is desired
+		
+		while (numTickets > 0 )														//Main loop
+			{
+				fcFull = 0;
+				ecFull = 0;
+				pfFull = 0;
+				
+				for (i=1; i<7; i++)													//determine which seating sections are full
+					{
+						fcFull+= arraySeats[i];
+						ecFull+= arraySeats[i+10];
+						if (i<4)
+							{
+								pfFull += arraySeats[i+6]; 
+							}	
+					}
+				
+				custTier = selectTier(&custTier);									//priming read for tier selection loop
+				while (custTier < 1 || custTier > 3)								//while tier selection is not valid continue tier selection loop.
+					{
+						invalidSelection();											//if the priming read was not a valid tier selection then loop will execute and this is an error message
+						custTier = selectTier(&custTier);							//print the tier selection menu and return the users choice
+						if (custTier == -1)											//check to see if a reset was initiated by the user	
+							{
+								resetYes = 1;										//set this variable to 1 to indicate that changes made in this pass through the loop are to be discarded.
+								break;												//breaks out of the inner while loop
+							}	
+					}
+				if (custTier == -1)											//check to see if a reset was initiated by the user in the priming read	
+					{
+						resetYes = 1;										//set this variable to 1 to indicate that changes made in this pass through the loop are to be discarded.	
+					}
+				if (custTier == 1 && fcFull == 6)							//checks to see if first class was selected and full
+					{
+						printf("\n All first class seats are currently reserved,\nwould you like to choose a different section?\nEnter Y or N.\n"); //prompt
+						customerChoice = yesOrNo();					//get customer decision
+						if (customerChoice == 1)					//evaluate yes
+							{
+								resetYes = 1;						//initiate reset (goes back to the beginning of the loop
+							}
+						if (customerChoice == 2)					//evaluate no
+							{
+								printf(" The next scheduled flight is in 3 hours\n"); //response as per problem statement.
+								exit(0);											 //exit because obviously they don't want tickets for this flight	
+							}	
+					}
+					if (custTier == 2 && pfFull == 4)			// checks to see if preferred is selectd and full, evaluation is same as first class 
+					{
+						printf("\n All Preferred Section seats are currently reserved,\nwould you like to choose a different section?\nEnter Y or N.\n");
+						customerChoice = yesOrNo();
+						if (customerChoice == 1)
+							{
+								resetYes = 1;
+							}
+						if (customerChoice == 2)
+							{
+								printf("The next scheduled flight is in 3 hours\n");
+								exit(0);	
+							}	
+					}
+					if (custTier == 3 && ecFull == 6)			//checks to see if economy is selected and full, evaluation is same as first class
+					{
+						printf("\n All Economy section seats are currently reserved,\nwould you like to choose a different section?\nEnter Y or N\n");
+						customerChoice = yesOrNo();
+						if (customerChoice == 1)
+							{
+								resetYes = 1;
+							}
+						if (customerChoice == 2)
+							{
+								printf("The next scheduled flight is in 3 hours\n");
+								exit(0);	
+							}	
+					}	
+				if (custTier > 0 && custTier < 4)							//verify a valid tier was selected befor entering seat selection
+					{   
+						printSeatDiagram(arraySeats);						//show the picture of what seats are available
+						curSeat = selectSeat(arraySeats, custTier);			//get the users seat selection input priming read
+						while (curSeat < 1 || curSeat > 16)					//if the priming read failed to get a valid seat then this loop triggers until you do or a reset is initiated.
+							{
+								
+								invalidSelection();							//if the priming read was not a valid seat selection then loop will execute and this is an error message
+							    printSeatDiagram(arraySeats);				//show the picture of what seats are available
+								curSeat = selectSeat(arraySeats,custTier);	//get the users seat selection
+								if (curSeat == -1)							//check to see if a reset was initiated by the user
+									{
+										resetYes = 1;						//set this variable to 1 to indicate that changes made in this pass through the loop are to be discarded.
+										break;								//breaks out of the inner while loop
+									}
+								
+							}
+					if (curSeat == -1)										//check to see if a reset was initiated by the user in the priming read	
+					{
+						resetYes = 1;										//set this variable to 1 to indicate that changes made in this pass through the loop are to be discarded.	
+					}	
+					arraySeats[curSeat]=1;									//updates the available seats by removing the users selection from the pool.
+					}
+				if	(curSeat > 0 && curSeat < 17)							//verifies a valid seat was selected before selecting a destination.
+					{
+										
+						curDest=selectDest();								//priming read for the destination selection loop 
+						while (curDest < 1 || curDest > 5)					//if an invalid choice of destination was entered then this loop will execute until a valid response is given.
+							{
+								invalidSelection();							//indicates that the previous selection was invalid
+							    curDest = selectDest();						//gets user input for destination again
+								if (curDest == -1)							//checks to see if a reset was initiated.
+									{
+										resetYes = 1;						//set to 1 to indicate a reset was requested.	
+										break;								//break out of the inner loop in the event of a reset request.
+									}
+							}
+					
+					if (curDest == -1)							//checks to see if a reset was initiated in the priming read
+						{
+							resetYes = 1;						//set this variable to 1 if the priming read returned a reset
+						}
+					}			
+				if	(curDest > 0 && curDest < 6)				//check for valid destination choice before acquiring the customer name.
+					{
+						gotName = getName(curName);				//uses an integer variable where a 1 indicates a successful string entry by the user. 
+						while (gotName != 1)					//while the user fails to enter a string this loop keeps trying to get one.
+							{
+								invalidSelection();				//error message indicates the priming read failed to return a good string.	
+							    gotName = getName(curName);		//tries again to get the users name
+								if (gotName == -1)				//checks to see if a reset was initiated.				
+									{
+										resetYes = 1;			//set to 1 in the event of a reset.
+										break;					//break out of the inner loop in the event of a reset
+									}
+							}
+					if (gotName == -1)				//checks to see if a reset was initiated at the priming read			
+						{
+						resetYes = 1;				//set to 1 to indicate a reset
+						}
+					}
+				
+			if (resetYes != 1)						//if no resets were initiated then continue
+				{
+					printTicket(curName,curDest,curSeat,custTier);			//print the ticket for the current pass
+			    	numTickets--;											//reduce the remaining number of tickets for this session
+					updateSeatingSaved(arraySeats);							//save the state of the array in a text file for future sessions.
+					for (i = 0; i < 17; i++)								//loop through the available seats array
+					{
+						savedSeats[i]=arraySeats[i];						//save the state of the available seats for use in case of a reset in remaining ticket selections.
+					}
+					for (i=0;i<25;i++)							//clear all positions of the curName string so no stray letters are there if the next name inputted is shorter than this one.
+					{
+						curName[i]= 0;
+					}
+				}
+			else											//a reset was initiated so.....
+				{
+				resetYes = 0;								//clear the value of the reset flag				
+				curDest = 0;								//clear the value of the current destination variable
+				custTier = 0;								//clear the value of the current tier selection
+				curSeat = 0;								//clear the value of the current seat selection
+				for (i=0;i<25;i++)							//clear all positions of the curName string so no stray letters are there if the next name inputted is shorter than this one.
+					{
+						curName[i]= 0;
+					}
+				for (i = 0; i < 17; i++)					//restore the list of available seats (arraySeats) to the state it was in at the end of the last successful pass (savedSeats)
+					{
+						arraySeats[i]=savedSeats[i];
+					}
+								
+				}	
+				
+				
+			}
+	
+system("pause")	;
+
+return 0;
+
+}
+
+
+int printTicket (char *cName, int cDest, int cSeat, int cTier)
+{
+	time_t currentTime;									//time variable to get the current date and time for printing on the ticket.
+    char *curTime;										//string variable to actually print the date and time.
+	int tCost;
+	char *cDestination;									//string variaable to correspond to the numeric value of the chosen destination
+	char *cSection;										//string variable to correspond to the numeric value of the tier selected
+	int i = 0;											//counter for loops
+	
+	
+	if (cDest == 1)										//these if statements determine which string applies to the destination.
+		{
+			cDestination =" Atlanta";
+		}
+	if (cDest == 2)
+		{
+			cDestination =" Las Vegas";
+		}
+	if (cDest == 3)
+		{
+			cDestination =" Seattle";
+		}	
+	if (cDest == 4)
+		{
+			cDestination =" Chicago";
+		}
+	if (cDest == 5)
+		{
+			cDestination =" New York";
+		}
+		
+	if (cTier == 1)										//these if statements determine which string applies to the seating section (tier)
+		{
+			cSection =" First Class";
+			tCost = 500;
+		}
+	if (cTier == 2)
+		{
+			cSection =" Preferred";
+			tCost = 350;
+		}
+		
+	if (cTier == 3)
+		{
+			cSection =" Economy";
+			tCost = 200;
+		}	
+		
+	
+	for (i=23; i>0; i--)								//this for loop ensures that the string terminator is placed immediately after the final letter in the name string (i was getting junk at the end of the names)
+		{
+			if (isalpha(cName[i]))
+				{
+					cName[i+1]='\0';
+					break;
+				}
+		}
+		
+	currentTime = time(NULL);				
+				//time assignment
+	curTime = ctime(&currentTime);						//time conversion to string	
+	curTime[strcspn(curTime, "\n")] = 0;				//remove the new line character from the string so it doesn't screw up my boxes	
+		
+	
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN );
+	
+	system("cls");										//clear the screen so the ticket is all they see.
+	printf("______________________________________________________________\n");
+	printf("| Name: %-25s                             |\n", cName);
+	printf("| Section: %-11s                                         |\n",cSection);
+	printf("| Seat Number: %-10d                                     |\n",cSeat);
+	printf("| Destination: %-10s                                     |\n",cDestination);
+	printf("| Code Flight Airlines Flight number 215                      |\n");
+	printf("| Purchased: %22s                         |\n",curTime);
+	printf("| Cost: $%-22d.00                            |\n",tCost);
+	printf("|_____________________________________________________________|\n");
+	printf("\n\n\nA printable text file named customerTicket.txt has been created with your tickets in it.\n\n");
+		
+SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), csbiInfo.wAttributes);
+	
+    FILE *txtFile;										//open a text file and use fprintf statements to create a copy of the ticket for the user.
+	
+	txtFile = fopen("customerTickets.txt", "a");
+	fprintf(txtFile,"______________________________________________________________\n");
+	fprintf(txtFile,"| Name: %-25s                             |\n", cName);
+	fprintf(txtFile,"| Section: %-11s                                         |\n",cSection);
+	fprintf(txtFile,"| Seat Number: %-10d                                     |\n",cSeat);
+	fprintf(txtFile,"| Destination: %-10s                                     |\n",cDestination);
+	fprintf(txtFile,"| Code Flight Airlines Flight number 215                      |\n");
+	fprintf(txtFile,"| Purchased: %22s                         |\n",curTime);
+	fprintf(txtFile,"| Cost: $%-22d.00                            |\n",tCost);
+	fprintf(txtFile,"|_____________________________________________________________|\n");
+
+
+
+	fclose(txtFile);									//close the text file
+
+
+
+	return 0;
+}
+
+
+
+
+
+
+
+int getName(char *usrName)													//function to acquire the passenger name
+{
+	
+ 	int returnValue = 0;																		//sentinel value returned as 1 if successful, 0 if not so the main knows to try again.
+	int i = 0;																					//temporary variable used in 'for' loop.	
+	unsigned char customerName[25]={0};															//temporary array used to hold the customers name.
+	int clrInput;																				//temporary variable used to clear the input buffer.
+
+	
+	printf(" Please Enter the full name of the passenger.\n");									//prompt for name
+	while((clrInput = getchar()) != '\n' && clrInput != EOF);									//credit to stackOverflow for this snippet that flushes the input buffer.
+	fgets(customerName, 25, stdin);																//get the name
+	
+	if (customerName == NULL)																	//returns 0 so the loop will try again if no entry was made
+		{
+			return 0;
+		} 
+	if (toupper(customerName[0])=='R' && !isalpha(customerName[1]))								//returns -1 if the custer entered only 'r' or 'R' to indicate a reset
+		{
+			return -1;
+		}
+	
+	customerName[strcspn(customerName, "\n")] = 0;												//remove any new line characters from the name string
+	for (i=0; customerName[i] != '\0'; i++)														//manually inserts each character from the local name variable to the main programs variable
+		{
+						
+					usrName[i]=customerName[i];
+			     
+		}
+		
+	
+	return 1;																					//if we made it this far then there is some kind of string there for a name so the return is successful (1).										
+		
+	
+	
+}
+
+int selectSeat(int *arrayPtr, int cTier)										//function to acquire the users preferred seating section.
+{
+	unsigned char tempValue[3]={0};												//temporary variable to hold the user input
+    int resSeat = 0;															//temporary variable to hold the selected seat
+    int i=0;																	//counter for 'for' loops
+    int decisionNum = 0;														//integer for interpreting results of Y or N selections
+		    
+    printf("\nPlease enter the numeric value of the seat you would like to reserve.\n");		//prompt for seat selection
+            scanf("%3s", tempValue);															//get user input	
+            resSeat = validateInput(tempValue);     											//validate the users input (returns 0 if a letter was entered, -1 for resets, or the value of the input if it was a number)
+   
+   if (resSeat == -1)							//check for reset
+   		{
+   			return -1;						//return -1 if reset was initiated
+   	    }
+   
+            
+   
+   if (arrayPtr[resSeat] == 1)													//check to see if the seat is reserved
+   		{
+   			printf("  We're Sorry, that seat is already reserved. Please Choose another Seat.\n"); //tell the user the seat was already taken
+			return 0;   																		//returns 0 so the loop will execute again and offer another seat selection
+		}
+	   
+   if ((resSeat < 1 || resSeat > 6) && cTier == 1)												//if you selected tier 1 (first class) your seat number cannot be higher than 6 or less than 1
+   		{
+   			printf("\n  We're Sorry, that seat is not in the First Class section.\n");			//tell the user that seat was not in their section	
+   			printf("  \n Please select from the available seats 1-6 or \n\n Enter 'R' to discard your selections and return to the tier selection menu.\n"); //repeat available options
+   			return 0;																			//back to main so the loop will ask again to select a seat
+		}
+	if( (resSeat > 16 || resSeat < 11) && cTier == 3)											//if you selected tier 3 (economy) your seat number cannot be higher than 16 or less than 11  
+  	 	{
+   			printf("\n  We're Sorry, that seat is not in the Economy section.\n");				//tell the user the seat was not in their section
+   			printf("    \n Please select from the available seats 11-16 or \n\n Enter 'R' to discard your selections and return to the tier selection menu.\n"); //repeat available options
+   			return 0;																			//back to main so the loop will ask again to select a seat
+		} 
+	if( (resSeat < 7 || resSeat > 10) && cTier == 2 )
+		{
+   			printf("\n  We're Sorry, that seat is not in the Preferred section.\n");				//if you selected tier 2 (preferred) your seat number cannot be less than 7 or higher than 10
+   			printf("    \n Please select from the available seats 7-10 or \n\n Enter 'R' to discard your selections and return to the tier selection menu.\n");//repeat available options
+   			return 0;																				//back to main so the loop will ask again to select a seat
+		}
+	if (resSeat == 9 || resSeat == 10)															//if you selected seat 9 or 10 display the warning and prompt them to accept the risk for being near the emergency exit.
+		{
+			printf(" \nThis seat is located on an Emergency Exit Row\n");
+			printf(" \nYou must be prepared to open the emergency exit \nand risk being sucked out of the plane \nor trampled by other passengers\n ");
+			printf("\n Do you accept this risk? Y or N \n");
+			decisionNum = yesOrNo();											
+			if (decisionNum == 1)						
+				{
+					return resSeat;						//if they chose to enter Y return the seat number and proceed
+				} 
+			else
+				{
+					return 0;							//if they did not choose Y then return 0 and the loop will ask again for a valid seat selection.	
+				}	
+		}	
+   return resSeat;										//if everything was done properly and the seat was available then this will return the chosen seat
+
+}
+int selectTier(int *cTier)				//function to select the users seating section
+{
+
+	unsigned char tempValue[3]={0};		//temporary variable to hold the user input
+	int numTier=0;						//temporary variable to hold validated user input
+    
+	printf("\n");
+	printf(" (1) Code Flight Airlines first class seats are $500.00\n");			//print tier pricing info
+    printf(" (2) Code Flight Airlines preferred seating is $350.00\n");
+    printf(" (3) Code Flight Airlines economy seats are $200.00\n");
+    printf(" \n All prices listed per seat per round trip to any location\n\n\n");
+	printf(" Please Select a Tier by entering the corresponding number.\n");		//prompt for input
+	scanf("%3s", tempValue);													//get input
+	numTier = validateInput(tempValue);    										//validate input
+	*cTier = numTier;															//assign the selected tier to the variable in the main program
+	
+	
+	return numTier;																//return value, mostly just to catch resets.
+}		
+
+
+int validateInput(unsigned char *userInput)			//function to validate the users input for the numerical input menus
+{
+
+unsigned char tempValue[3];							//temporary variable to hold the user input
+unsigned char tempChar = 'Q';						//variable representing the quit character
+unsigned char retChar = 'R';						//variable representing the return character
+int returnValue = 0;								//integer value corresponding to the validation results
+int i = 0;											//counter for 'for' loops
+int decisionNum = 0;								//integer value corresponding to Y or N decisions
+
+tempValue[0]=userInput[0];							//gets the first character of the users input.
+
+if (isalpha(tempValue[0]))							//checks to see if its a letter
+      {
+        tempValue[0] = toupper(tempValue[0]); 		//converts to upper case
+        if (tempValue[0] == tempChar)				//checks for 'Q'
+	        {
+	       		printf("Are you sure you want to quit. Enter Y or N.\n");
+	       		decisionNum = yesOrNo();			//evaluate Y or N decision		
+				  if (decisionNum==1);				//if Y then thank you and exit
+	       	 		{
+			    		printf(" Press any Key to exit the Program, Thank you for flying Code Flight Airlines.\n");  // not really a prompt... just a goodbye message
+           				exit(0); 
+        	 		}
+        	}
+            else					//if not yes then return a 0 so the function calling it knows it needs to repeat the input cycle again.
+           		{
+           			returnValue = 0;
+				}
+           
+        if (tempValue[0] == retChar)		//checks for 'R'
+	       {
+           	
+	       		
+				printf("Are you sure you would like\nto return to the tier selection menu?\nAll data for this ticket will be discarded. Enter Y or N.\n");
+				decisionNum = yesOrNo();			//evaluate Y or N decision
+				if ( decisionNum == 1 )				//if yes return a -1 so the calling function can pass along the requested reset
+	       	 		{
+           				returnValue = -1; 
+             		}
+				else								//if not Y then return 0 so the calling function can repeat the user input cycle
+					{
+					 return 0;	
+					}	  
+			}
+        if (tempValue[0] != tempChar && tempValue[0] != retChar)		//if it was a letter but not Q or R then it returns 0 so the function can repeat the user input cycle
+           {
+            return 0;            
+           }
+       }
+       
+for (i=0; i<3; i++)					//this for loop ensures that if a number was entered that the entire number is evaluated and converted not just the first character
+    {
+     tempValue[i]=userInput[i];
+     }  
+             
+ if (isdigit(tempValue[0]))			//if the first character is a number then get the whole number out of the string
+      {
+       returnValue = (int) strtol(tempValue, NULL, 10);		//convert the string value to an integer value
+      }
+      
+ return returnValue;    //return the number that the user inputted
+}    
+
+
+int yesOrNo(unsigned char *userInput)		//function for evaluating yes or no responses
+{
+
+unsigned char tempValue[3];					//temporary variable to hold the user input
+unsigned char tempChar = 'Y';				//temporary variable to hold the yes condition	
+unsigned char retChar = 'N';				//temporary variable to hold the no condition
+int returnValue = 0;						//numeric representation of the users decision, 1 for yes anything else is no
+
+
+scanf("%3s", tempValue);					//the prompt is in the calling function this gets the response
+
+
+ if (isdigit(tempValue[0]))			//checks to see if its a number (if it was then none of the above statements executed)
+      {
+       returnValue = 0;  			//numbers are not a yes so returns 0.
+      }
+
+	if (isalpha(tempValue[0]))				//makes sure its a letter
+       {
+
+       	tempValue[0] = toupper(tempValue[0]);		//converts it to uppercase
+    
+ 	    if (tempValue[0] == tempChar)				//checks for Y
+	       {
+
+   	 	       returnValue = 1;						//returns 1 for yes
+                     
+           }
+        if (tempValue[0] == retChar)				//checks for N
+	       {
+         	  returnValue = 2; 						//returns 2 for N
+                     
+           }           
+        if (tempValue[0] != tempChar && tempValue[0] != retChar)   //catches any other letters and returns 0 
+           {
+          	  returnValue = 0;            			
+           }
+       }
+             
+
+
+
+
+if (returnValue != 0)
+	{
+		return returnValue;
+	}
+
+
+while (returnValue == 0)	//if returnValue is a zero then they have entered a number or a letter other than Y or N and we keep going till they enter Y or N
+{
+	printf("\nPlease enter Y or N to confirm your decision.\n");				//prompt
+	scanf("%3s", tempValue);						//get input
+	if (isalpha(tempValue[0]))						//repeat checks from above for letters or numbers and match to Y or N
+       {
+       	tempValue[0] = toupper(tempValue[0]); 
+ 	    if (tempValue[0] == tempChar)
+	       {
+   	 	       returnValue = 1;
+                     
+           }
+        if (tempValue[0] == retChar)
+	       {
+         	  returnValue = 2; 
+                     
+           }           
+        if (tempValue[0] != tempChar && tempValue[0] != retChar)
+           {
+          	  returnValue = 0;            
+           }
+       }
+             
+ if (isdigit(tempValue[0]))
+      {
+       returnValue = 0;  
+      }
+}
+ return returnValue;      				// finally got a Y or N so return the returnValue (0, 1, 2)
+}    
+
+int invalidSelection()					//this function is run when the priming read fails to return a valid selection and each time the loop fails as well for tier, seats, and destination
+{
+
+	printf(" \n Your last entry failed to complete or initiated a reset.\n Please limit your responses to the Menu Options, Thank You!\n\n");		//generic error message
+	system("pause");
+	return 0;
+}
+
+int printIntro()						//displays the welcome message and returns the number of tickets this customer wishes to purchase.
+{
+	unsigned char tempValue[3]={0};		//temporary variable to hold the user input	
+    int numContinue;					//temporary variable to hold the number of tickets after validation
+	
+	printf(" \n   Enter the number of tickets you would like to purchase.\n   You may enter 'R' to start over or Q to quit at any time.\n\n");
+	printf("   If 'R' is entered ALL DATA ENTERED for the current session will be lost.\n");		//user prompt and instructions.
+	scanf("%3s", tempValue);																	//get user input
+	numContinue = validateInput(tempValue);														//validate user input
+	system("cls");
+	return numContinue;																			//return the number of tickets
+	
+}
+
+
+int printSeatDiagram(int *array)					//print the picture of the airplane and the available seats... don't touch it... don't even breathe on it... 
+{
+
+ 
+   int i = 0;
+ 	
+
+
+
+printf("                      / \\         \n");                                                 
+printf("                     /   \\        \n");                                     
+printf("                    /     \\       \n");                                   
+printf("                    | /*\\ |       \n");                                    
+printf("                    | - - |        \n");                                   
+printf("                    | - - |        \n");                                   
+printf("                    |     |        \n");                                   
+ 
+
+for (i=1; i<17;i++)														//this loop prints the seating chart, each row has two iterations of 'i' and some rows require extra print statements to draw the wings.
+	{
+	if( i==7)														//row 7 includes the front of the wing
+		{
+			printf("    /^^^^^^^^^^^^^^^");
+		}
+	else if( i==9)
+		{
+			printf("   /                ");							//row 9 includes the tip of the wing
+		}
+	else if( i==11)
+		{
+			printf("  |_________________");							//row 11 includes the back of the wing
+		}
+	else if( i==13)
+		{
+			printf("         @          ");							//row 13 includes the engines
+		}	
+	else
+		{
+		printf("                    ");								//every other seating row requires this many spaces
+		}	
+          	
+	if (array[i] == 0)												
+ 	   { 
+ 	   
+			printf("|");										//if the seat is not reserved print the seat number
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN );
+			printf("%2d",i);
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), csbiInfo.wAttributes);
+		}
+	if (array[i] == 1)
+ 	   { 
+			printf("|");
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED );
+			printf(" X");											//if the seat is reserved print an 'X' instead
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), csbiInfo.wAttributes);
+		}
+
+	i++;															//we increase i here to move from the odd numbered to even numbered seats in the same row.
+	
+	if (array[i] == 0)												//if the seat is not reserved print the seat number
+ 	   { 
+ 	   	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN );
+		printf(" %2d",i);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), csbiInfo.wAttributes);
+		printf("|");											//if the seat is reserved print an 'X' instead
+		}
+	if (array[i] == 1)
+  	  { 
+  	  	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED );
+		printf("  X");
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), csbiInfo.wAttributes);
+		printf("|");
+		}		
+	if (i==8)
+		{
+			printf("^^^^^^^^^^^^^^^\\ \n"); 						//repeats the process for the other side of the planes wings on rows 7,9,11,& 13
+		}
+	else if (i==10)
+		{
+			printf("                \\  \n");  	
+		}
+	else if (i==12)
+		{
+			printf("_________________|\n");	
+		}
+	else if (i==14)
+		{
+			printf("          @ \n"); 
+		}
+	else
+		{
+			printf("\n"); 
+		}
+	
+}
+
+
+                                
+                                    
+printf("                    |     |      \n");                                    
+printf("                    |     |      \n");                                    
+printf("                    |  /\\ |     \n");                                   
+printf("                   _| | | |_     \n");                                   
+printf("                  |__ | | __|    \n");                                   
+printf("                     |_|_|       \n");
+
+
+
+return 0;
+
+   
+}
+
+
+
+
+int selectDest()						// prints a menu and allows the user to select a destination.
+{
+	unsigned char tempValue[3]={0};		//temporary variable to hold the user input
+    int selDest = 0;					//variable used to return the validated input
+	
+	
+	
+	printf("\n");
+	printf(" Please select your destination.\n");		//prompt
+	printf(" (1)  Atlanta\n");
+	printf(" (2)  Las Vegas\n");
+	printf(" (3)  Seattle\n");
+	printf(" (4)  Chicago\n");
+	printf(" (5)  New York\n");
+	
+	
+	scanf("%3s", tempValue);							//get input
+    selDest = validateInput(tempValue);					//validate input
+	
+	return selDest;										//return validated input
+
+}
+int updateSeatingSaved(int * lastSessionSeats)			//save the state of the seating chart to a text file
+{
+	
+	int i = 0;											//counter for 'for' loops
+	
+	FILE *txtFile;										//pointer to file
+	
+	txtFile = fopen("savedsession.txt", "w+");			//open file in write mode, discard current contents
+	
+	if (txtFile == NULL)								//error message if file could not be opened.
+		{
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED );
+			printf("File could not be opened, unable to save seating chart\n");
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), csbiInfo.wAttributes);
+			return 0;				
+		}
+	
+	
+	for (i=0;i<17;i++)									//loop to print the array values into the file.
+	{
+	fprintf(txtFile,"%d ",lastSessionSeats[i]);
+	}
+		
+	fclose(txtFile);									//close the text file
+	
+	return 0;
+}
+
+
+int retrieveSeatingSaved(int *lastSessionSeats)			//function to update the current seating chart to match the last saved version of the seating chart.	
+{
+	int i = 0;											//counter for 'for' loops
+	int tempVariable = 0;								//temporary variable to hold the value of the integer read from the file. 
+	
+	
+	FILE *txtFile;										//pointer to text file
+	
+	txtFile = fopen("savedsession.txt", "r");			//open file in read mode
+	
+	if (txtFile == NULL)								//error message if file could not be opened
+		{
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED );
+			printf(" File could not be opened, proceeding with all seats available\n\n");
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), csbiInfo.wAttributes);
+			return 0;				
+			
+		}
+for(i=0;i<17;i++)								//I like the while loop here, could have used a for loop but 
+	{
+												//loop will not go to the end of the file program is vulnerable here. Manipulation of that textfile could cause a crash.
+			
+		fscanf(txtFile, "%d ",&tempVariable);	//get an assign integer values
+		lastSessionSeats[i]=tempVariable;		//transfer from temporary variable back to the array
+		
+	}
+	
+	
+
+		
+	fclose(txtFile);							//close text File
+return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
