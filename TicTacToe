@@ -1,0 +1,393 @@
+/* Name: Ani Desai*/
+/* Assisted by: Chris Allen*/
+
+#include <iostream>
+#include <Windows.h>
+using namespace std;
+
+ CONSOLE_SCREEN_BUFFER_INFO csbiInfo; 
+ WORD wOldColorAttrs; 
+
+  void menu();                                                                      // The Menu function displays the welcome message 
+  void displayBoard();                                                             // The displayBorad function displays the tic tac toe board 
+  void field();                                                                   // The Field function displays who's turn is it and also notifies user if the selcted field has been taken or not
+  void manual();                                                                 // The Manual function displays the user manual of the game
+  void play();                                                                  // The play function assigns the X (Player 1) and O (Player 2)  in the board              
+  char win();                                                                  // The win function calculates the winner of the game.
+  char XorO(int playerNum);                                                   // Inputs for x or o 
+  char cArray[3][3] = {{'1', '2', '3'} , {'4', '5', '6'} , {'7', '8', '9'}}; // cArray is a board of 3 * 3
+  int player = 1;                                                           //  Player is iniliatze to 1
+  int  bCounter;                                                           //Counter number of times player plays the game
+  
+ 
+  
+  void menu()  // function prototype
+  
+  {
+  	 system("cls");
+  	 
+  	 cout<< "        _________________________________________________________  "   << endl;
+  	 cout<< "       |                                                         |"    << endl; 
+  	 cout<< "       |             Welcome To Tic Tac Toe Game                 |"    << endl;      
+  	 cout<< "       |                                                         |"    << endl;
+  	 cout<< "       |                 Player 1 is --> X                       |"    << endl;
+  	 cout<< "       |                                                         |"    << endl;
+	 cout<< "       |                 Player 2 is --> O                       |"    << endl;
+	 cout<< "       |_________________________________________________________|"    << endl;
+  	 
+	 cout << "\n"<< endl;  // prints new line
+  	
+  	
+  } // end menu function
+  
+  
+void displayBoard() // function prototype
+{
+    
+    cout << "     |     |     " << endl;
+    cout << "  " << cArray[0][0] << "  |  " << cArray[0][1] << "  |  " <<cArray[0][2] << endl;    // prints the numbers stored in an array from row and column
+    cout << "_____|_____|_____" << endl;
+    cout << "     |     |     " << endl;
+    cout << "  " << cArray[1][0] << "  |  " << cArray[1][1] << "  |  " << cArray[1][2] << endl;  // prints the numbers stored in an array from row and column
+    cout << "_____|_____|_____" << endl;
+    cout << "     |     |     " << endl;
+    cout << "  " << cArray[2][0] << "  |  " << cArray[2][1] << "  |  " << cArray[2][2] << endl;  // prints the numbers stored in an array from row and column
+    cout << "     |     |     " << endl;
+
+} // end function display board
+
+void field() // function prototype
+{
+	
+	int number;
+
+	cout << "\n"<< endl;
+	cout << "  It is Player " << player << " turn."<< " Enter the field number:  ";  // Displays the message who's turn is it
+	cin >> number;
+    
+	system ("cls");
+	
+	if (number == 1)
+	{        
+	    // checking if the field has been taken or not
+	    
+		if (cArray[0][0] == '1')
+		{
+		    cArray[0][0] = XorO(player); 
+			 
+	    } // end if
+	    else 
+	    {
+	    	menu();
+			displayBoard();                                                                        
+	    	cout << " The field is already in use. Please choose a different field" << endl;  // displays the message to the user if the field has been taken 
+		    field();
+		    
+		} // end else
+	} // end if 
+	
+	else if (number == 2)
+	{ 
+	    // checking if the field has been taken or not
+		if (cArray[0][1] == '2')
+		{
+		    cArray[0][1] = XorO(player);
+	    } // end if
+	    else 
+	    { 
+		    menu();
+			displayBoard();
+	    	cout << " The field is already in use. Please choose a different field" << endl;  // displays the message to the user if the field has been taken 
+	        field();
+		} // end else
+	} // end else if
+	else if (number == 3)
+	{
+		// checking if the field has been taken or not
+		if (cArray[0][2] == '3')
+		{
+		    cArray[0][2] = XorO(player);
+	    } // end if
+	    else 
+	    { 
+		    menu();
+			displayBoard();
+	    	cout << " The field is already in use. Please choose a different field" << endl; // displays the message to the user if the field has been taken 
+	        field();
+		} // end else
+	} // end else if
+	else if (number == 4)
+	{
+		// checking if the field has been taken or not
+		if (cArray[1][0] == '4')
+		{
+		    cArray[1][0] = XorO(player);
+	    } // end if
+	    else 
+	    { 
+		    menu();
+			displayBoard();
+	    	cout << " The field is already in use. Please choose a different field" << endl;  // displays the message to the user if the field has been taken 
+	        field();
+		} // end else
+	} // end else if
+	else if (number == 5)
+	{
+		// checking if the field has been taken or not
+		if (cArray[1][1] == '5')
+		{
+		    cArray[1][1] = XorO(player);
+	    } // end if
+	    else 
+	    { 
+		    menu();
+			displayBoard();
+	    	cout << " The field is already in use. Please choose a different field" << endl;  // displays the message to the user if the field has been taken 
+	        field();
+		} // end else
+	} // end else if
+	else if (number == 6)
+	{
+		// checking if the field has been taken or not
+		if (cArray[1][2] == '6')
+		{
+		    cArray[1][2] = XorO(player);
+	    } // end if
+	    else 
+	    { 
+		    menu();
+			displayBoard();
+	    	cout << " The field is already in use. Please choose a different field" << endl;  // displays the message to the user if the field has been taken 
+	        field();
+		} // end else
+	} // end else if
+	else if (number == 7)
+	{
+		// checking if the field has been taken or not
+		if (cArray[2][0] == '7')
+		{
+		    cArray[2][0] = XorO(player);
+	    } // end if
+	    else 
+	    {  
+		    menu();
+			displayBoard();
+	    	cout << " The field is already in use. Please choose a different field" << endl;  // displays the message to the user if the field has been taken 
+	        field();
+		} // end else
+	} // end else if
+	else if (number == 8)
+	{
+		// checking if the field has been taken or not
+		if (cArray[2][1] == '8')
+		{
+		    cArray[2][1] = XorO(player);
+	    } // end if
+	    else 
+	    { 
+		    menu();
+			displayBoard();
+	    	cout << " The field is already in use. Please choose a different field" << endl;  // displays the message to the user if the field has been taken 
+	        field();
+		} // end else
+	} // end else if
+	else if (number == 9)
+	{
+		// checking if the field has been taken or not
+		if (cArray[2][2] == '9')
+		{
+		    cArray[2][2] = XorO(player);
+	    } // end if
+	    else 
+	    { 
+		    menu();
+			displayBoard();
+	    	cout << " The field is already in use. Please choose a different field" << endl;  // displays the message to the user if the field has been taken 
+	        field();
+		} // end else
+	} // end else if
+	
+	else
+	{
+		menu();
+		displayBoard();
+		cout << " You entered an invalid number.  Please try again." << endl;  // If the player enters the number outside the field number then it displays the message invalid number
+		field();
+	}
+	
+    number=0;
+    
+} // end field function
+
+void manual() // function prototype
+
+{
+	int approval;
+	
+	  GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE),&csbiInfo);
+	  wOldColorAttrs = csbiInfo.wAttributes;
+	  SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN ); // Color is set to Green 
+	
+	cout << "          PLEASSE FOLLOW THIS INSTRCTIONS IN ORDER TO PLAY THE GAME. \n";  // prints the message in green 
+	cout << "\n"<< endl;
+  
+   // displays the instructions on how to play the game
+   
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), csbiInfo.wAttributes); // Does not change the below instructions to green color 
+	
+	cout <<" (1). Two players are needed to play this game.\n\n ";
+	cout <<"(2). Player 1 (X) always goes first.\n\n";
+	cout <<" (3). Player 2 is O.\n\n";
+	cout <<" (4). In order to place the X or O enter the field number from the board.\n\n ";
+	cout <<"(5). The goal of the Tic Tac Toe is to get three Xs or Os in a row, \n    horizontally, vertically or diagonally.\n\n";
+	cout <<" (6). If neither of the player has three in a row, horizontally, vertically or \n  diagonally the game is a draw.\n\n";
+	
+
+	cout << " Enter zero (0) to continue  "; 
+	cin >> approval;
+	
+	system("cls");
+
+	
+} // end function manual
+
+void play()   // function prototype                      
+{
+	if (player == 1)  // changing the player 1 and 2 
+	  player = 2;
+	  
+	else 
+	  player = 1;
+	
+} // end function play
+
+char win()         
+{  
+    // This is for player 1. X is set to place in each row or column when the user hits the field number from the board. 
+    
+	if (cArray[0][0] == 'X' && cArray[0][1] == 'X' && cArray[0][2] == 'X' )
+	  return 'X';
+	 
+	if (cArray[1][0] == 'X' && cArray[1][1] == 'X' && cArray[1][2] == 'X' )
+	  return 'X';
+	  
+	if (cArray[2][0] == 'X' && cArray[2][1] == 'X' && cArray[2][2] == 'X' )
+	  return 'X';  
+	
+
+	
+	if (cArray[0][0] == 'X' && cArray[1][0] == 'X' && cArray[2][0] == 'X' )
+	  return 'X';
+	  
+	if (cArray[0][1] == 'X' && cArray[1][1] == 'X' && cArray[2][1] == 'X' )
+	  return 'X';
+	  
+	if (cArray[0][2] == 'X' && cArray[1][2] == 'X' && cArray[2][2] == 'X' )
+	  return 'X'; 
+	  
+
+	if (cArray[0][0] == 'X' && cArray[1][1] == 'X' && cArray[2][2] == 'X' )
+	  return 'X';  
+	  
+	if (cArray[2][0] == 'X' && cArray[1][1] == 'X' && cArray[0][2] == 'X' )
+	  return 'X';  
+	
+	// This is for player 2. O is set to place in each row or column when the user hits the field number from the board. 
+	
+	if (cArray[0][0] == 'O' && cArray[0][1] == 'O' && cArray[0][2] == 'O' )
+	  return 'O';
+	 
+	if (cArray[1][0] == 'O' && cArray[1][1] == 'O' && cArray[1][2] == 'O' )
+	  return 'O';
+	  
+	if (cArray[2][0] == 'O' && cArray[2][1] == 'O' && cArray[2][2] == 'O' )
+	  return 'O';  
+	
+	
+	if (cArray[0][0] == 'O' && cArray[1][0] == 'O' && cArray[2][0] == 'O' )
+	  return 'O';
+	  
+	if (cArray[0][1] == 'O' && cArray[1][1] == 'O' && cArray[2][1] == 'O' )
+	  return 'O';
+	  
+	if (cArray[0][2] == 'O' && cArray[1][2] == 'O' && cArray[2][2] == 'O' )
+	  return 'O'; 
+	  
+
+	if (cArray[0][0] == 'O' && cArray[1][1] == 'O' && cArray[2][2] == 'O' )
+	  return 'O';  
+	  
+	if (cArray[2][0] == 'O' && cArray[1][1] == 'O' && cArray[0][2] == 'O' )
+	  return 'O';  
+	  
+	return '/';  
+	   
+} // end function win
+
+int main ()
+{
+	bCounter = 0;
+	int answer;
+	menu();
+	
+	
+	cout << " Do you want to view the manual? (Enter 0 for Yes & 1 for No) ";  // Ask the user if they want to display the manual
+	cin >> answer;
+	
+    cout << "\n"; // new line
+	cout << "\n"; // new line
+	
+	if (answer == 0)  // If they enter 0 then the manual will be displayed
+	{
+		manual();
+	} // end if
+	
+	while (1)
+	{	
+		bCounter++;
+	    displayBoard();
+		field();
+		menu();
+		play();
+	
+		
+		if (win() == 'X' ) // checks if player 1 won
+		{
+			cout << " Player 1 Wins!" << endl;  // prints the message to notify player 1 won
+			break;
+		} // end if
+		
+		else if (win() == 'O') // checks if player 2 won 
+		{
+			cout << " Player 2 Wins!" << endl;  // prints the message to notify if player 2 won  
+			break;
+			
+		} // end else if
+		
+		else if (win() == '/' && bCounter == 9 ) // checks if the game was a draw
+		{
+			cout << " It's a Draw!" << endl; // prints the message if neither players has won the game
+			break;
+			
+		} // end else if
+		
+	} // end while
+	
+ system("pause");	
+ return 0;	
+ 
+} // End function main 
+
+char XorO(int playerNum) // function prototype
+{
+
+	if (playerNum == 1) // If it was player 1 then changes the field number to X on the board
+	{ 
+	   
+		return 'X';
+	    
+	}
+	
+	return 'O'; // If it was player 2 then changes the field number to O on the board
+
+} // end XorO function
