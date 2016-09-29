@@ -1,0 +1,130 @@
+#include <stdio.h>
+#include <stdlib.h>
+int main (void) 
+{
+       char firstName  [25];      
+       char lastName   [25];        
+       char resiState  [25];         
+       int  numAge; 
+       int  citizenUnited;
+       int  conFelon;
+       int  felon;
+       int  activeDuty; 
+       int  number;   
+system("COLOR F9");                                      /*F is for background color (white), & 9 is for font color (light blue)*/
+printf ("\n");
+printf ("\n");
+printf ("\n");
+printf ("\n");
+printf("   W    W    W   E E E    L        C C C     OOO     M   M   E E E  ! ! ! !\n");
+printf("    W   W   W    E        L       C        O     O   M M M   E      ! ! ! !\n");
+printf("     W  W  W     E E      L       C        O     O   M   M   E E    ! ! ! !\n");
+printf("      W   W      E        L       C        O     O   M   M   E      ! ! ! !\n");
+printf("       W W       E E E    L L L    C C C     OOO     M   M   E E E  ! ! ! !\n");
+printf("\n");
+printf("\n");
+printf ("********************************************************************************\n");
+printf ("*          ***Welcome to Tiffany & Ani's voter registration program***         *\n");
+printf ("*                              LET'S GET STARTED!!!                            *\n");
+printf ("********************************************************************************\n");
+printf ("\n");
+printf ("\n");
+printf("Please Enter your First Name: ");                                       // Ask the user for their first name
+scanf("%s", &firstName);
+printf ("Please Enter your Last Name: ");                                     // Ask the usder for their last name
+scanf ("%s", &lastName);
+printf ("\n");
+printf ("Are you a U.S. citizen?(1 for Yes - 2 for No):  ");                // Ask the user if he/she is a U.S. Citizen
+scanf ("%d", &citizenUnited);
+printf ("\n");
+      if (citizenUnited == 1) {                                           //Begin if statement
+          printf ("What is your state of residency: ");                  // Ask the user for theur State of Residency
+          scanf ("%s", &resiState);
+          printf ("\n");
+          }                                                            //end if
+      else if (citizenUnited == 2) {                                  //Begin else if
+           getch();
+           system("COLOR FC");                                       //(white) background, (light red) font
+           printf ("You are Not Eligible to vote!!!\n");
+           printf ("\n");
+           }                                                        //end else if
+      printf ("If you are told you are Not Eligible to Vote, Enter Zero to end program, or Any Other Number plus Enter to continue: ");  // Prompt the user
+      scanf ("%d", &number);
+      while ( number != 0){                                       //Begin while
+        printf ("Enter your Age: ");                             // Ask the user for their age
+        scanf ("%d", &numAge); 
+        printf ("\n");  
+        if (numAge >= 18) {
+            printf ("Are you Active Duty Military? (1 for Yes - 2 for No): ");  // Ask the user if they are on a Active Duty Military
+            scanf ("%d", &activeDuty);
+            printf ("\n");
+            }                                                     //end if 
+      else if (numAge < 18) {
+            getch();
+            system("COLOR FC");                                 //(white) background, (light red) font
+            printf ("You are Not Eligible to vote!!!\n");
+            printf ("\n");
+            printf ("If you are told you are Not Eligible to Vote,Enter zero to end program, or Any Other Number plus Enter to continue: ");  // Prompt the user
+            scanf ("%d", &number);
+            }                                                                // end else if
+            printf ("Are you a Convicted Felon?(1 for Yes - 2 for No): ");  // Ask the user if they are Convicted Felon
+            scanf ("%d", &conFelon); 
+            printf ("\n");          
+       if (conFelon == 2) {
+            printf ("                  Congratulations!!! You are Eligible to Vote!!!\n");  // Prompt the user
+            printf("\n");
+            }                                                                   // end if
+        else if (conFelon == 1) {        
+            printf ("Have your voting rights been restored?(1 for Yes - 2 for No): ");
+            scanf ("%d", &felon);
+            printf("\n");
+            }                                                               // end else if
+         if (felon == 2) {
+             getch();
+             system("COLOR FC");                                          //(white) background, (light red) font
+             printf ("You are Not Eligible to Vote!!!\n");
+             printf("\n");
+             }                                                         // end if
+        else if (felon == 1){
+             printf ("                Congratulations!!! You are Eligible to Vote!!!\n"); 
+             printf ("\n");
+             }                                                      // end else if
+printf ("Enter zero to end program: ");
+scanf ("%d", &number);              
+}                                                                 //end while
+printf ("\n");
+printf ("\n");
+getch(); 
+system("COLOR B5");                                                                                 //(light aqua) background, (purple) font
+printf ("                                                  &                        \n");
+printf(" TTTTT I FFFF FFFF    A      N   N  Y     Y      &&&         A      N   N   I  \n");
+printf("   T   I F    F      A A     NNN N   Y   Y      &           A A     NNN N   I  \n");
+printf("   T   I FFF  FFF   A A A    NNNNN     Y         &&&       A A A    NNNNN   I  \n");
+printf("   T   I F    F    A     A   N  NN     Y        &         A     A   N  NN   I  \n");
+printf("   T   I F    F   A       A  N   N     Y         &&&     A       A  N   N   I  \n");
+printf ("                                                  &                        \n");
+printf ("\n");
+printf ("*****************    WOULD   *******   LIKE   *******   TO    ******************\n");
+printf("\n");
+printf ("********************************************************************************\n");    
+printf ("*               !!!!!!!!!!!THANK YOU FOR USING OUR PROGRAM!!!!!!!!!!!          *\n"); 
+printf ("********************************************************************************\n");
+printf ("\n");
+printf ("\n"); 
+printf("Press Enter for more information on voter registration...\n");
+getch();
+system("COLOR 9E");                                                                                 //(light blue) background, (light yellow) font
+printf ("********************************************************************************\n");
+printf ("*         RRRR    EEEE   M   M   EEEE   M   M   BBBB    EEEEE   RRRR           *\n");
+printf ("*         R   R   E      M M M   E      M M M   B   B   E       R   R          *\n");
+printf ("*         RRR     EEE    M   M   EEE    M   M   BBBB    EEE     RRR            *\n");
+printf ("*         R  R    E      M   M   E      M   M   B   B   E       R  R           *\n");
+printf ("*         R   R   EEEE   M   M   EEEE   M   M   BBBB    EEEEE   R   R          *\n");
+printf ("********************************************************************************\n");
+printf ("****YOU    CAN    READ     MORE      ABOUT     VOTER    REGISTRATION      AT****\n");
+printf ("************************          WWW.CANIVOTE.ORG       ***********************\n");
+printf ("*                                HAVE A NICE DAY!!!                            *\n");
+printf ("********************************************************************************\n");
+system("pause");
+return 0;
+}                                                                     // end main
