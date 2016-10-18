@@ -1,0 +1,189 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+
+/*Name: Ani Desai
+ * Triangle Project 
+ */
+
+
+
+public class triangles
+{
+    
+       public  static void Main(string[] args)
+        {
+            double sideA; // User Inputs Side a
+            double sideB; // User Inputs Side b
+            double sideC; // User Inputs Side c
+
+            double angleA = 0; // Initiliazing angleA
+            double angleB = 0; // Initiliazing angleB
+            double angleC = 0; // Initiliazing angleC
+
+            double areaB = 0; // Initiliazing areaB
+
+            double sideBisectorA = 0; // Initiliazing sideBisectorA
+            double sideBisectorB = 0; // Initiliazing sideBisectorB
+            double sideBisectorC = 0; // Initiliazing sideBisectorC
+
+            double sideMedianA = 0; // Initiliazing sideMedianA
+            double sideMedianB = 0; // Initiliazing sideMedianB
+            double sideMedianC = 0; // Initiliazing sideMedianC
+
+            double radiusCircum = 0; // Initiliazing radiusCircum
+
+            double radiusInscribed = 0; //Initiliazing radiusInscribed
+
+            string input;
+
+            Console.Write(" Enter the Length of Side A: "); // User Input
+            input = Console.ReadLine();
+            sideA = Convert.ToDouble(input);
+
+            Console.Write(" Enter the Length of Side B: "); // User Input
+            input = Console.ReadLine();
+            sideB = Convert.ToDouble(input);
+
+            Console.Write(" Enter the Length of Side C: "); // User Input
+            input = Console.ReadLine();
+            sideC = Convert.ToDouble(input);
+
+            
+
+           if(sideA + sideB < sideC || sideA + sideC < sideB || sideB + sideC < sideA) 
+               Console.Write("\n Can not forma a Triangle");
+           else
+               Console.Write("\n The Triangle is formed\n\n");
+
+
+           angleC = myAngles(sideA, sideB, sideC); // CosA
+           angleA = myAngles(sideB, sideC, sideA); // CosB
+           angleB = myAngles(sideC, sideA, sideB); // CosC
+
+           areaB = myArea(sideA, sideC, angleB); // Area of Angle B
+
+           sideBisectorA = bisectorSideA(sideB, sideC, angleA); // Bisector Side a
+           sideBisectorB = bisectorSideA(sideA, sideC, angleB); // Bisector Side b
+           sideBisectorC = bisectorSideA(sideA, sideB, angleC); // Bisector Side c
+
+           sideMedianB = median(sideA, sideB, sideC); // Median Side B
+           sideMedianA = median(sideB, sideA, sideC); // Median Side A
+           sideMedianC = median(sideB, sideC, sideA); // Median Side C
+
+           radiusCircum = circum(sideC, angleC);
+
+           radiusInscribed = inCircum(sideC, angleA, angleB, angleC);
+             
+   
+
+           Console.WriteLine(" Angle A: {0}", angleA); // Display Angle A 
+           Console.WriteLine(" Angle B: {0}", angleB); // Display Angle B
+           Console.WriteLine(" Angle C: {0}", angleC); // Display Angle C
+
+           Console.Write("\n"); // New Line
+
+           Console.WriteLine(" Area of Angle B: {0}", areaB); // Display Area B 
+
+           Console.Write("\n"); // New Line
+
+           Console.WriteLine(" Angle Bisector of Side a: {0}", sideBisectorA); // Display sideBisectorA
+           Console.WriteLine(" Angle Bisector of Side b: {0}", sideBisectorB); // Display sideBisectorB
+           Console.WriteLine(" Angle Bisector of Side c: {0}", sideBisectorC); // Display sideBisectorC
+
+           Console.Write("\n"); // New Line
+
+           Console.WriteLine(" Median Side a: {0}", sideMedianA); // Display sideMedianA
+           Console.WriteLine(" Median Side b: {0}", sideMedianB); // Display sideMedianB
+           Console.WriteLine(" Median Side c: {0}", sideMedianC); // Display sideMedianC
+
+           Console.Write("\n"); // New Line
+
+           Console.WriteLine(" The Circumscribed Circle Radius for Angle C: {0}", radiusCircum);
+
+           Console.Write("\n"); // New Line
+
+           Console.WriteLine(" The Inscribed Circle Radius is: {0}", radiusInscribed);
+      
+
+           Console.ReadKey(true);
+           
+
+        } // End Main
+
+       public static double myAngles(double sideA, double sideB, double sideC) // Angle Method
+       {
+           double angle = 0;
+           angle = ((sideA * sideA) + (sideB * sideB) - (sideC * sideC)) / (2 * sideA * sideB);
+           angle = Math.Acos(angle);
+
+           angle = angle * (180 / Math.PI);
+
+           return angle;
+
+       } // end myAngles
+
+
+       public static double myArea(double sideA, double sideC, double angleB) // Area Method
+       {
+           double area = 0;
+           angleB = angleB * (Math.PI / 180); // Convert to Radiant
+           area = sideA * sideC * Math.Sin(angleB) / 2; // Formula to calculate area of AngleB 
+          
+           return area;
+
+       } // end myArea
+
+       public static double bisectorSideA(double sideB, double sideC, double angleA) // Bisector Side Method
+       {
+           double bisector = 0;
+           angleA = angleA * (Math.PI / 180); // Convert to Radiant
+           bisector = (2 * sideB * sideC * Math.Cos(angleA / 2)) / (sideB + sideC); // Formula to calculate bisector
+
+           return bisector;
+
+       }// end bisectorSideA
+
+       public static double median(double sideB, double sideA, double sideC)
+       {
+           double medianSide = 0;
+
+         
+           medianSide = (2 * (sideB * sideB) + 2 * (sideC * sideC) - ( sideA * sideA)) / 4;
+           medianSide = Math.Sqrt(medianSide); // Calculates the SquareRoot of medianSide
+
+           return medianSide;
+
+       } // end median 
+
+       public static double circum(double sideC, double angleC) 
+       {
+           double radius = 0;
+
+           angleC = angleC * (Math.PI / 180);
+           radius = sideC / (2 * Math.Sin(angleC));
+           return radius;
+
+       } // End method circum
+
+       public static double inCircum(double sideC, double angleA, double angleB, double angleC)
+       {
+           double inRadius = 0;
+
+           inRadius = sideC * Math.Sin(angleA / 2) * Math.Sin(angleB / 2) * Math.Cos(angleC / 2);
+           return inRadius;
+
+       } // End method inCircum
+
+
+      
+      
+
+
+
+
+
+
+} // End class triangles
